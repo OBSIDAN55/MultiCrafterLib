@@ -1,10 +1,11 @@
-package multicraft;
+package trs.multicraft;
 
 import arc.*;
 import arc.graphics.*;
 import arc.graphics.g2d.*;
 import arc.math.*;
 import arc.math.geom.*;
+import arc.scene.ui.Image;
 import arc.scene.ui.layout.*;
 import arc.struct.*;
 import arc.util.*;
@@ -25,7 +26,7 @@ import mindustry.world.blocks.payloads.*;
 import mindustry.world.consumers.*;
 import mindustry.world.draw.*;
 import mindustry.world.meta.*;
-import multicraft.ui.*;
+import trs.multicraft.ui.*;
 
 import static mindustry.Vars.*;
 
@@ -669,7 +670,7 @@ public class MultiCrafter extends PayloadBlock {
         IOEntry entry = isInput ? recipe.input : recipe.output;
         int i = 0;
         for (ItemStack stack : entry.items) {
-            Cell<ItemImage> iconCell = mat.add(new ItemImage(stack.item.uiIcon, stack.amount))
+            Cell<Image> iconCell = mat.add(new Image(stack.item.uiIcon))
                     .pad(2f);
             if (isInput) iconCell.left();
             else iconCell.right();
@@ -852,7 +853,7 @@ public class MultiCrafter extends PayloadBlock {
         if (isConsumeItem) consume(new ConsumeItemDynamic(
             (MultiCrafterBuild b) -> b.getCurRecipe().input.items
         ));
-        if (isConsumeFluid) consume(new ConsumeFluidDynamic(
+        if (isConsumeFluid) consume(new ConsumeLiquidsDynamic(
             (MultiCrafterBuild b) -> b.getCurRecipe().input.fluids
         ));
         if (isConsumePower) consume(new ConsumePowerDynamic(b ->

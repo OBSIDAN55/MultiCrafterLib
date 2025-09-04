@@ -1,6 +1,7 @@
-package multicraft;
+package trs.multicraft;
 
 import arc.func.*;
+import arc.scene.ui.Image;
 import arc.scene.ui.layout.*;
 import mindustry.gen.*;
 import mindustry.type.*;
@@ -19,7 +20,7 @@ public class CustomConsumePayloadDynamic extends Consume {
     
     @Override
     public float efficiency(Building build){
-        float mult = multiplier.get(build);
+        float mult = build.efficiency;
         for(PayloadStack stack : payloads.get(build)){
             if(!build.getPayloads().contains(stack.item, Math.round(stack.amount * mult))){
                 return 0f;
@@ -30,7 +31,7 @@ public class CustomConsumePayloadDynamic extends Consume {
 
     @Override
     public void trigger(Building build){
-        float mult = multiplier.get(build);
+        float mult = build.efficiency;
         for(PayloadStack stack : payloads.get(build)){
             build.getPayloads().remove(stack.item, Math.round(stack.amount * mult));
         }
@@ -64,8 +65,8 @@ public class CustomConsumePayloadDynamic extends Consume {
         table.table(c -> {
             int i = 0;
             for(PayloadStack stack : pay){
-                c.add(new ReqImage(new ItemImage(stack.item.uiIcon, Math.round(stack.amount * multiplier.get(build))),
-                () -> inv.contains(stack.item, Math.round(stack.amount * multiplier.get(build))))).padRight(8);
+                c.add(new ReqImage(new Image(stack.item.uiIcon),
+                () -> inv.contains(stack.item, Math.round(stack.amount * build.efficiency)))).padRight(8);
                 if(++i % 4 == 0) c.row();
             }
         }).left();

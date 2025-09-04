@@ -1,4 +1,4 @@
-package multicraft;
+package trs.multicraft;
 
 import arc.func.*;
 import arc.graphics.*;
@@ -15,8 +15,8 @@ import mindustry.world.*;
 
 import java.util.*;
 
-import static multicraft.ContentResolver.*;
-import static multicraft.ParserUtils.*;
+import static trs.multicraft.ContentResolver.*;
+import static trs.multicraft.ParserUtils.*;
 
 public class MultiCrafterParser {
     private static final String[] inputAlias = {"input", "in", "i"};

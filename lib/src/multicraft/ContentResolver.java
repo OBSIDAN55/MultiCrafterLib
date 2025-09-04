@@ -1,4 +1,4 @@
-package multicraft;
+package trs.multicraft;
 
 import arc.*;
 import arc.func.*;
@@ -15,7 +15,7 @@ import mindustry.world.*;
 
 import java.lang.reflect.*;
 
-import static multicraft.ParserUtils.*;
+import static trs.multicraft.ParserUtils.*;
 
 public class ContentResolver {
 

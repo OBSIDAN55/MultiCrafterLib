@@ -1,4 +1,4 @@
-package multicraft;
+package trs.multicraft;
 
 import arc.graphics.g2d.*;
 import arc.struct.*;
@@ -7,7 +7,7 @@ import mindustry.entities.units.*;
 import mindustry.gen.*;
 import mindustry.world.*;
 import mindustry.world.draw.*;
-import multicraft.MultiCrafter.*;
+import trs.multicraft.MultiCrafter.*;
 
 public class DrawRecipe extends DrawBlock {
     public int defaultDrawer = 0;
