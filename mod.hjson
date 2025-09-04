@@ -2,7 +2,7 @@ displayName: "MultiCrafter Lib"
 name: "multi-crafter"
 author: "[#42a5f5[]]Liplum[[]] & Jojo"
 subtitle: "For JSON and Javascript mods."
-repo: "liplum/MultiCrafterLib"
+repo: "OBSIDAN55/MultiCrafterLib"
 main: "net.liplum.MultiCrafterMod"
 description:
 '''
