@@ -1,4 +1,4 @@
-package multicraft.ui;
+package trs.multicraft.ui;
 
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;

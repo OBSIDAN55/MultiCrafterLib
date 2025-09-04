@@ -1,4 +1,4 @@
-package multicraft.ui;
+package trs.multicraft.ui;
 
 import arc.graphics.g2d.*;
 import arc.math.*;
