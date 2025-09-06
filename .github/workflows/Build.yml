@@ -30,11 +30,11 @@ jobs:
           ./gradlew :main:deploy
           ./gradlew distInjection
 
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: MultiCrafterMod
           path: main/build/tmp/deploy/*.jar
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: MultiCrafterLibDist
           path: build/tmp/distInjection/*.zip
