@@ -2,6 +2,10 @@ name: Build Mod
 
 on: [push, pull_request]
 
+permissions:
+  contents: write  # <--- нужно обязательно!
+
+
 jobs:
   buildJar:
     runs-on: ubuntu-latest

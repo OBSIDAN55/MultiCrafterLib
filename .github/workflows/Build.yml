@@ -1,6 +1,10 @@
 name: Build Mod
 on: [push, pull_request, workflow_dispatch]
 
+permissions:
+  contents: write  # <--- нужно обязательно!
+
+
 jobs:
   build:
     runs-on: ubuntu-latest
