@@ -7,6 +7,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Set Android SDK tools
         run: echo "$ANDROID_HOME/build-tools/34.0.0" >> $GITHUB_PATH
 
@@ -30,11 +33,18 @@ jobs:
           ./gradlew :main:deploy
           ./gradlew distInjection
 
-      - uses: actions/upload-artifact@v3
+      - name: Upload MultiCrafterMod artifact
+        uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: MultiCrafterMod
           path: main/build/tmp/deploy/*.jar
-      - uses: actions/upload-artifact@v3
+          if-no-files-found: warn
+      
+      - name: Upload MultiCrafterLibDist artifact
+        uses: actions/upload-artifact@v3
+        if: always()
         with:
           name: MultiCrafterLibDist
           path: build/tmp/distInjection/*.zip
+          if-no-files-found: warn
