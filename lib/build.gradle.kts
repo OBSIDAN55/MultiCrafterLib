@@ -1,104 +1,92 @@
-plugins{
-    id 'java'
-    id 'com.diffplug.spotless' version '6.25.0'
+import io.github.liplum.mindustry.minGameVersion
+
+plugins {
+    `maven-publish`
+    id("io.github.liplum.mgpp") version "1.3.2"
 }
-
-version '1.0'
-
-sourceSets.main.java.srcDirs = ["src"]
-
-repositories{
-    mavenCentral()
-    maven{ url "https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository" }
-    maven{ url 'https://www.jitpack.io' }
-}
-
-java{
-    targetCompatibility = 8
-    sourceCompatibility = JavaVersion.VERSION_17
-}
-
-ext{
-    //the build number that this mod is made for
-    mindustryVersion = 'v151.1'
-    jabelVersion = "93fde537c7"
-    //windows sucks
-    isWindows = System.getProperty("os.name").toLowerCase().contains("windows")
-    sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
-}
-
-//java 8 backwards compatibility flag
-allprojects{
-    tasks.withType(JavaCompile){
-        options.compilerArgs.addAll(['--release', '8'])
+buildscript {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url = uri("https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository") }
+        maven { url = uri("https://www.jitpack.io") }
     }
 }
+allprojects {
+    group = "net.liplum"
+    version = "2.0.0"
+    buildscript {
+        repositories {
+            maven { url = uri("https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository") }
+            maven { url = uri("https://www.jitpack.io") }
+        }
+    }
+    repositories {
+        mavenCentral()
+        maven { url = uri("https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository") }
+        maven { url = uri("https://www.jitpack.io") }
+    }
 
+    //force arc version
+    configurations.all {
+        resolutionStrategy {
+            eachDependency {
+                if(this.requested.group == "com.github.Anuken.Arc") {
+                    this.useVersion("v146")
+                }
+            }
+        }
+    }
 
-dependencies{
-    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
-    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
-
-    annotationProcessor "com.github.Anuken:jabel:$jabelVersion"
-}
-
-//force arc version
-configurations.all{
-    resolutionStrategy.eachDependency { details ->
-        if(details.requested.group == 'com.github.Anuken.Arc'){
-            details.useVersion "$mindustryVersion"
+    tasks.withType<Test>().configureEach {
+        useJUnitPlatform()
+        testLogging {
+            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+            showStandardStreams = true
         }
     }
 }
-
-task jarAndroid{
-    dependsOn "jar"
-
-    doLast{
-        if(!sdkRoot || !new File(sdkRoot).exists()) throw new GradleException("No valid Android SDK found. Ensure that ANDROID_HOME is set to your Android SDK directory.");
-
-        def platformRoot = new File("$sdkRoot/platforms/").listFiles().sort().reverse().find{ f -> new File(f, "android.jar").exists()}
-
-        if(!platformRoot) throw new GradleException("No android.jar found. Ensure that you have an Android platform installed.")
-
-        //collect dependencies needed for desugaring
-        def dependencies = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList() + [new File(platformRoot, "android.jar")]).collect{ "--classpath $it.path" }.join(" ")
-
-        def d8 = isWindows ? "d8.bat" : "d8"
-
-        //dex and desugar files - this requires d8 in your PATH
-        "$d8 $dependencies --min-api 14 --output ${project.name}Android.jar ${project.name}Desktop.jar"
-            .execute(null, new File("$buildDir/libs")).waitForProcessOutput(System.out, System.err)
+mindustry {
+    dependency {
+        mindustry on "v146"
+        arc on "v146"
+    }
+    client {
+        mindustry official "v146"
+    }
+    server {
+        mindustry official "v146"
+    }
+    run {
+        clearOtherMods
     }
 }
 
-jar{
-    archiveFileName = "${project.name}Desktop.jar"
-
-    from{
-        configurations.runtimeClasspath.collect{ it.isDirectory() ? it : zipTree(it) }
-    }
-
-    from(projectDir){
-        include "mod.hjson"
-    }
-
-    from("assets/"){
-        include "**"
-    }
+tasks.register<net.liplum.DistributeInjection>("distInjection") {
+    group = "build"
+    dependsOn(":injection:deploy")
+    jar.from(tasks.getByPath(":injection:deploy"))
+    name.set("MultiCrafterLib-injection.zip")
+    excludeFiles.add(File("icon.png"))
+    excludeFiles.add(File("mod.hjson"))
+    excludeFolders.add(File("META-INF"))
 }
 
-task deploy(type: Jar){
-    dependsOn jarAndroid
-            dependsOn jar
-            archiveFileName = "${project.name}.jar"
-
-    from{ [zipTree("$buildDir/libs/${project.name}Desktop.jar"), zipTree("$buildDir/libs/${project.name}Android.jar")] }
-
-    doLast{
-        delete{
-            delete "$buildDir/libs/${project.name}Desktop.jar"
-            delete "$buildDir/libs/${project.name}Android.jar"
+tasks.register("retrieveMeta") {
+    doLast {
+        println("::set-output name=header::${rootProject.name} v$version on Mindustry v${mindustry.meta.minGameVersion}")
+        println("::set-output name=version::v$version")
+        try {
+            val releases = java.net.URL("https://api.github.com/repos/liplum/MultiCrafterLib/releases").readText()
+            val gson = com.google.gson.Gson()
+            val info = gson.fromJson<List<Map<String, Any>>>(releases, List::class.java)
+            val tagExisted = info.any {
+                it["tag_name"] == "v$version"
+            }
+            println("::set-output name=tag_exist::$tagExisted")
+        } catch (e: Exception) {
+            println("::set-output name=tag_exist::false")
+            logger.warn("Can't fetch the releases", e)
         }
     }
 }
