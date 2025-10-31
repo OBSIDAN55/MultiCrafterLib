@@ -22,11 +22,18 @@ java {
     targetCompatibility = JavaVersion.VERSION_1_8
 }
 dependencies {
-    implementation("com.github.Anuken:Mindustry:v147")
-    implementation("com.github.Anuken.Arc:arc-core:v147")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
-    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
-    testImplementation("com.github.liplum:TestUtils:v0.1")
+    compileOnly "com.github.Anuken.Arc:arc-core:$mindustryVersion"
+    compileOnly "com.github.Anuken.Mindustry:core:$mindustryVersion"
+
+    annotationProcessor "com.github.Anuken:jabel:$jabelVersion"
+}
+
+configurations.all{
+    resolutionStrategy.eachDependency { details ->
+        if(details.requested.group == 'com.github.Anuken.Arc'){
+            details.useVersion "$mindustryVersion"
+        }
+    }
 }
 
 java {
