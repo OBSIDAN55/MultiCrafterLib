@@ -43,7 +43,8 @@ mindustryAssets {
 }
 dependencies {
     implementation(project(":lib"))
-    importMindustry()
+    implementation("com.github.Anuken:Mindustry:v146")
+    implementation("com.github.Anuken.Arc:arc-core:v146")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testImplementation("com.github.liplum:TestUtils:v0.1")
 }
