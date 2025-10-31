@@ -40,9 +40,20 @@ jobs:
           path: main/build/tmp/deploy/*.jar
           if-no-files-found: warn
 
+      - name: Find jar file
+        id: find_jar
+        run: |
+          JAR_FILE=$(find main/build/tmp/deploy -name "*.jar" -type f | head -n 1)
+          if [ -z "$JAR_FILE" ]; then
+            echo "Error: No jar file found in main/build/tmp/deploy/"
+            exit 1
+          fi
+          echo "jar_path=$JAR_FILE" >> $GITHUB_OUTPUT
+          echo "Found jar file: $JAR_FILE"
+
       - name: Create release
         uses: svenstaro/upload-release-action@v2
         with:
           tag: ${{ github.run_number }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: main/build/tmp/deploy/*.jar
+          file: ${{ steps.find_jar.outputs.jar_path }}
