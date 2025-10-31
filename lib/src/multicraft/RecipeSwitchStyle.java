@@ -1,4 +1,4 @@
-package trs.multicraft;
+package multicraft;
 
 import arc.scene.ui.*;
 import arc.scene.ui.layout.*;
@@ -9,7 +9,7 @@ import mindustry.gen.*;
 import mindustry.graphics.*;
 import mindustry.type.*;
 import mindustry.ui.*;
-import trs.multicraft.MultiCrafter.*;
+import multicraft.MultiCrafter.*;
 
 import java.util.*;
 

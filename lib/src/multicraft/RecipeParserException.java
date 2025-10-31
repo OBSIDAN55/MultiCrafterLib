@@ -1,4 +1,4 @@
-package trs.multicraft;
+package multicraft;
 
 public class RecipeParserException extends RuntimeException{
     public RecipeParserException() {

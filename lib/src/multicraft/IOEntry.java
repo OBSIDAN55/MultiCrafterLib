@@ -1,4 +1,4 @@
-package trs.multicraft;
+package multicraft;
 
 import arc.func.*;
 import arc.graphics.*;
