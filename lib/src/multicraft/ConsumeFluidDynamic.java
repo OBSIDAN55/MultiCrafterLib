@@ -25,6 +25,7 @@ public class ConsumeFluidDynamic extends Consume {
 
     @Override
     public void update(Building build) {
+
         LiquidStack[] fluids = this.fluids.get(build);
         remove(build.liquids, fluids, build.edelta());
     }
