@@ -18,6 +18,18 @@ sourceSets {
         java.srcDir("src")
     }
 }
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+}
+
 dependencies {
     implementation(gradleApi())
     implementation("net.lingala.zip4j:zip4j:2.11.1")
