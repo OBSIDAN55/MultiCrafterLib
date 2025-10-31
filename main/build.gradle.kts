@@ -44,9 +44,27 @@ mindustryAssets {
 tasks.jar {
     dependsOn(":lib:jar")
 }
+
+// Make deploy work without Android SDK (copy desktop jar as dexed.jar if not available)
+afterEvaluate {
+    tasks.named("deploy").configure {
+        doFirst {
+            val dexedJar = file("$buildDir/tmp/dexJar/dexed.jar")
+            if (!dexedJar.exists()) {
+                // Copy desktop jar as dexed.jar if Android SDK is not available
+                val desktopJar = tasks.named("jar").get().outputs.files.singleFile
+                dexedJar.parentFile.mkdirs()
+                desktopJar.copyTo(dexedJar, overwrite = true)
+                logger.warn("Using desktop jar as dexed.jar (Android SDK not available)")
+            }
+        }
+    }
+}
+
 dependencies {
     implementation(project(":lib"))
-    importMindustry()
+    compileOnly("com.github.Anuken.Arc:arc-core:v146")
+    compileOnly("com.github.Anuken.Mindustry:core:v146")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testImplementation("com.github.liplum:TestUtils:v0.1")
 }

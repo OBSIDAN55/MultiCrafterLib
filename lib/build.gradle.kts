@@ -26,7 +26,8 @@ java {
 }
 
 dependencies {
-    importMindustry()
+    compileOnly("com.github.Anuken.Arc:arc-core:v146")
+    compileOnly("com.github.Anuken.Mindustry:core:v146")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.8.2")
     testImplementation("com.github.liplum:TestUtils:v0.1")

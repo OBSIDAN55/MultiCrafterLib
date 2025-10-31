@@ -45,6 +45,19 @@ allprojects {
             showStandardStreams = true
         }
     }
+    
+    // Make dexJar optional if Android SDK is not available
+    afterEvaluate {
+        val sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
+        if (sdkRoot == null || !java.io.File(sdkRoot).exists()) {
+            tasks.matching { it.name == "dexJar" }.configureEach {
+                enabled = false
+                doFirst {
+                    logger.warn("Android SDK not found, skipping dexJar task for ${project.name}")
+                }
+            }
+        }
+    }
 }
 mindustry {
     dependency {
