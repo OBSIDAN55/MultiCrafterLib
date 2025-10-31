@@ -7,7 +7,7 @@ import mindustry.entities.units.*;
 import mindustry.gen.*;
 import mindustry.world.*;
 import mindustry.world.draw.*;
-import trs.multicraft.MultiCrafter.*;
+import multicraft.MultiCrafter.*;
 
 public class DrawRecipe extends DrawBlock {
     public int defaultDrawer = 0;

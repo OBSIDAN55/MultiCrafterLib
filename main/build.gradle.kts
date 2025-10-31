@@ -41,10 +41,12 @@ mindustry {
 mindustryAssets {
     root at "$projectDir/assets"
 }
+tasks.jar {
+    dependsOn(":lib:jar")
+}
 dependencies {
     implementation(project(":lib"))
-    implementation("com.github.Anuken:Mindustry:v146")
-    implementation("com.github.Anuken.Arc:arc-core:v146")
+    importMindustry()
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
     testImplementation("com.github.liplum:TestUtils:v0.1")
 }

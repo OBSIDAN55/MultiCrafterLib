@@ -34,6 +34,9 @@ mindustry {
 mindustryAssets {
     root at "$projectDir/assets"
 }
+tasks.jar {
+    dependsOn(":lib:jar")
+}
 dependencies {
     implementation(project(":lib"))
     importMindustry()

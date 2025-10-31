@@ -15,8 +15,8 @@ import mindustry.world.*;
 
 import java.util.*;
 
-import static trs.multicraft.ContentResolver.*;
-import static trs.multicraft.ParserUtils.*;
+import static multicraft.ContentResolver.*;
+import static multicraft.ParserUtils.*;
 
 public class MultiCrafterParser {
     private static final String[] inputAlias = {"input", "in", "i"};

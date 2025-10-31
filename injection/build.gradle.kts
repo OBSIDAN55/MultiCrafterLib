@@ -26,6 +26,7 @@ mindustryAssets {
     root at "$projectDir/assets"
 }
 tasks.jar {
+    dependsOn(":lib:jar")
     from(projectDir.resolve("assets")) {
         include("scripts/lib.js")
     }

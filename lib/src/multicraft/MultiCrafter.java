@@ -26,7 +26,7 @@ import mindustry.world.blocks.payloads.*;
 import mindustry.world.consumers.*;
 import mindustry.world.draw.*;
 import mindustry.world.meta.*;
-import trs.multicraft.ui.*;
+import multicraft.ui.*;
 
 import static mindustry.Vars.*;
 

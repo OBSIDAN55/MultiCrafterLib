@@ -15,7 +15,7 @@ import mindustry.world.*;
 
 import java.lang.reflect.*;
 
-import static trs.multicraft.ParserUtils.*;
+import static multicraft.ParserUtils.*;
 
 public class ContentResolver {
 
