@@ -32,7 +32,7 @@ jobs:
           cp build/tmp/distInjection/*.zip out
 
       - name: Upload building
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: MultiCrafter
           path: out/*
