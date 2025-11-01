@@ -5,11 +5,4 @@ pluginManagement {
         mavenCentral()
     }
 }
-include(
-    "main",
-    "js",
-    "java",
-    "injection",
-    "lib",
-    "standalone"
-)
+include("lib")

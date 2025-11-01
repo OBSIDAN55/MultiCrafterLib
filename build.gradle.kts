@@ -1,8 +1,5 @@
-import io.github.liplum.mindustry.minGameVersion
-
 plugins {
     `maven-publish`
-    id("io.github.liplum.mgpp") version "1.3.2"
 }
 buildscript {
     repositories {
@@ -38,68 +35,5 @@ allprojects {
         }
     }
 
-    tasks.withType<Test>().configureEach {
-        useJUnitPlatform()
-        testLogging {
-            exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
-            showStandardStreams = true
-        }
-    }
-    
-    // Make dexJar optional if Android SDK is not available
-    afterEvaluate {
-        val sdkRoot = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
-        if (sdkRoot == null || !java.io.File(sdkRoot).exists()) {
-            tasks.matching { it.name == "dexJar" }.configureEach {
-                enabled = false
-                doFirst {
-                    logger.warn("Android SDK not found, skipping dexJar task for ${project.name}")
-                }
-            }
-        }
-    }
-}
-mindustry {
-    dependency {
-        mindustry on "v147"
-        arc on "v147"
-    }
-    client {
-        mindustry official "v147"
-    }
-    server {
-        mindustry official "v147"
-    }
-    run {
-        clearOtherMods
-    }
-}
-
-tasks.register<net.liplum.DistributeInjection>("distInjection") {
-    group = "build"
-    dependsOn(":injection:deploy")
-    jar.from(tasks.getByPath(":injection:deploy"))
-    name.set("MultiCrafterLib-injection.zip")
-    excludeFiles.add(File("icon.png"))
-    excludeFiles.add(File("mod.hjson"))
-    excludeFolders.add(File("META-INF"))
-}
-
-tasks.register("retrieveMeta") {
-    doLast {
-        println("::set-output name=header::${rootProject.name} v$version on Mindustry v${mindustry.meta.minGameVersion}")
-        println("::set-output name=version::v$version")
-        try {
-            val releases = java.net.URL("https://api.github.com/repos/liplum/MultiCrafterLib/releases").readText()
-            val gson = com.google.gson.Gson()
-            val info = gson.fromJson<List<Map<String, Any>>>(releases, List::class.java)
-            val tagExisted = info.any {
-                it["tag_name"] == "v$version"
-            }
-            println("::set-output name=tag_exist::$tagExisted")
-        } catch (e: Exception) {
-            println("::set-output name=tag_exist::false")
-            logger.warn("Can't fetch the releases", e)
-        }
-    }
+    // Tests disabled - library doesn't have test dependencies
 }
