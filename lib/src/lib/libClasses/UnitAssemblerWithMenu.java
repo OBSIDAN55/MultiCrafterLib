@@ -323,11 +323,11 @@ public class UnitAssemblerWithMenu extends PayloadBlock{
         @Override
         public void buildConfiguration(Table table) {
             super.buildConfiguration(table);
-            table.background(Styles.black6);
+            table.background(Styles.none);
 
             // Создаем таблицу с кнопками для каждого плана
             Table buttonTable = new Table();
-            buttonTable.defaults().size(80f, 50f).pad(4f);
+            buttonTable.defaults().size(80f, 50f).pad(1f);
             buttonTable.defaults().scaling(Scaling.fill);
 
             // Генерируем кнопки для каждого плана
