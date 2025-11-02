@@ -1,20 +1,7 @@
-buildscript {
-    repositories {
-        mavenCentral()
-        maven { url = uri("https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository") }
-        maven { url = uri("https://www.jitpack.io") }
-    }
-    dependencies {
-        classpath("com.github.Anuken:mgpp:1.0.0")
-    }
-}
-
 plugins {
     `java-library`
     `maven-publish`
 }
-
-apply(plugin = "com.github.Anuken.mgpp")
 
 sourceSets {
     main {
@@ -43,11 +30,9 @@ tasks.jar {
     from("assets")
 }
 
-// Плагин mgpp автоматически создает задачу dexJar и deploy для Android
-// Настройка modCore
-extensions.configure<com.github.anuken.mgpp.MindustryExtension> {
-    version.set("v147")
-}
+// Для Android сборки библиотека использует стандартный JAR
+// Android версия создается через dexJar задачу, которая выполняется автоматически
+// в GitHub Actions, если Android SDK установлен
 
 publishing {
     publications {
