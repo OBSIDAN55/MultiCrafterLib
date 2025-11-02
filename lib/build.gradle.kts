@@ -30,7 +30,7 @@ tasks.jar {
     from("assets")
 }
 
-// Задача для создания DEX версии JAR для Android
+// Задача для создания DEX версии JAR для Android (использует d8/dx)
 val dexJar = tasks.register("dexJar") {
     group = "build"
     description = "Create Android DEX JAR"
@@ -46,43 +46,6 @@ val dexJar = tasks.register("dexJar") {
         val androidHome = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
             ?: throw GradleException("ANDROID_HOME not set. Cannot create DEX JAR.")
         
-        // Находим dx инструмент
-        val buildToolsDir = file("$androidHome/build-tools")
-        val buildTools = if (buildToolsDir.exists() && buildToolsDir.isDirectory) {
-            buildToolsDir.listFiles()?.filter { 
-                it.isDirectory && it.name.matches(Regex("\\d+\\.\\d+\\.\\d+"))
-            }?.maxWithOrNull(compareBy { dir ->
-                dir.name.split('.').mapNotNull { it.toIntOrNull() }.let {
-                    // Сравниваем версии: major * 1000000 + minor * 1000 + patch
-                    if (it.size >= 3) it[0] * 1000000 + it[1] * 1000 + it[2]
-                    else if (it.size == 2) it[0] * 1000000 + it[1] * 1000
-                    else if (it.size == 1) it[0] * 1000000
-                    else 0
-                }
-            })
-        } else {
-            null
-        }
-        
-        val dxPath = if (buildTools != null) {
-            val dx = file("$buildTools/dx")
-            val dxBat = file("$buildTools/dx.bat")
-            when {
-                dx.exists() -> dx.absolutePath
-                dxBat.exists() -> dxBat.absolutePath
-                else -> throw GradleException("dx not found in $buildTools")
-            }
-        } else {
-            // Попробуем стандартный путь
-            val dx = file("$androidHome/build-tools/34.0.0/dx")
-            val dxBat = file("$androidHome/build-tools/34.0.0/dx.bat")
-            when {
-                dx.exists() -> dx.absolutePath
-                dxBat.exists() -> dxBat.absolutePath
-                else -> throw GradleException("dx not found. Please ensure Android SDK build-tools are installed.")
-            }
-        }
-        
         val jarFile = jarTask.archiveFile.get().asFile
         val dexDir = layout.buildDirectory.dir("tmp/dex").get().asFile
         dexDir.mkdirs()
@@ -92,45 +55,62 @@ val dexJar = tasks.register("dexJar") {
             dexFile.delete()
         }
         
-        // Запускаем dx для конвертации JAR в DEX
-        exec {
-            commandLine(dxPath, "--dex", "--output=${dexFile.absolutePath}", jarFile.absolutePath)
+        // Пробуем найти d8 (новый инструмент) или dx (старый)
+        val buildToolsPath = "$androidHome/build-tools"
+        val buildToolsDir = file(buildToolsPath)
+        
+        if (!buildToolsDir.exists()) {
+            throw GradleException("Android build-tools not found at $buildToolsPath")
+        }
+        
+        // Ищем любую версию build-tools
+        val buildTools = buildToolsDir.listFiles()?.firstOrNull { it.isDirectory }
+            ?: throw GradleException("No build-tools version found")
+        
+        // Пробуем d8 сначала (новые версии Android SDK)
+        val d8 = file("$buildTools/d8")
+        val d8Bat = file("$buildTools/d8.bat")
+        val dx = file("$buildTools/dx")
+        val dxBat = file("$buildTools/dx.bat")
+        
+        when {
+            d8.exists() -> {
+                exec {
+                    commandLine(d8.absolutePath, "--output=$dexDir", jarFile.absolutePath)
+                }
+            }
+            d8Bat.exists() -> {
+                exec {
+                    commandLine(d8Bat.absolutePath, "--output=$dexDir", jarFile.absolutePath)
+                }
+            }
+            dx.exists() -> {
+                exec {
+                    commandLine(dx.absolutePath, "--dex", "--output=${dexFile.absolutePath}", jarFile.absolutePath)
+                }
+            }
+            dxBat.exists() -> {
+                exec {
+                    commandLine(dxBat.absolutePath, "--dex", "--output=${dexFile.absolutePath}", jarFile.absolutePath)
+                }
+            }
+            else -> {
+                throw GradleException("Neither d8 nor dx found in $buildTools")
+            }
         }
     }
 }
 
-// Задача для создания JAR из DEX для Android
-val dexJarToJar = tasks.register("dexJarToJar", Copy::class.java) {
-    group = "build"
-    description = "Copy DEX file as JAR for Android"
-    
-    dependsOn(dexJar)
-    
-    onlyIf {
-        val androidHome = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
-        androidHome != null && file(androidHome).exists()
-    }
-    
-    val dexDir = layout.buildDirectory.dir("tmp/dex")
-    val dexFile = file("${dexDir.get().asFile}/classes.dex")
-    val outputJar = file("${dexDir.get().asFile}/MultiCrafterLib.jar")
-    
-    from(dexFile) {
-        rename { "MultiCrafterLib.jar" }
-    }
-    into(dexDir)
-}
-
-// Задача deploy для создания финального ZIP файла с DEX версией
+// Задача deploy для создания финального ZIP файла
 tasks.register("deploy", Zip::class.java) {
     group = "build"
-    description = "Create deployable mod ZIP for Android"
+    description = "Create deployable mod ZIP"
     
     dependsOn(tasks.jar)
     
     val androidHome = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
     if (androidHome != null && file(androidHome).exists()) {
-        dependsOn(dexJarToJar)
+        dependsOn(dexJar)
     }
     
     archiveFileName.set("MultiCrafterLib.zip")
@@ -140,20 +120,23 @@ tasks.register("deploy", Zip::class.java) {
     from("icon.png")
     from("assets")
     
-    // Добавляем JAR файл (DEX или обычный)
+    // Добавляем JAR файл
     val androidHomeCheck = System.getenv("ANDROID_HOME") ?: System.getenv("ANDROID_SDK_ROOT")
     if (androidHomeCheck != null && file(androidHomeCheck).exists()) {
+        // Используем DEX версию для Android
         val dexDir = layout.buildDirectory.dir("tmp/dex").get().asFile
-        val dexJarFile = file("$dexDir/MultiCrafterLib.jar")
-        if (dexJarFile.exists()) {
-            from(dexJarFile)
+        val dexFile = file("$dexDir/classes.dex")
+        if (dexFile.exists()) {
+            from(dexFile) {
+                rename { "MultiCrafterLib.jar" }
+            }
         } else {
             from(tasks.jar.get().archiveFile) {
                 rename { "MultiCrafterLib.jar" }
             }
         }
     } else {
-        // Добавляем обычный JAR если DEX не доступен
+        // Используем обычный JAR для десктопа
         from(tasks.jar.get().archiveFile) {
             rename { "MultiCrafterLib.jar" }
         }
