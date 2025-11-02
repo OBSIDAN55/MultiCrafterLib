@@ -5,7 +5,7 @@ plugins{
 
 version '1.0'
 
-sourceSets.main.java.srcDirs = ["src"]
+sourceSets.main.java.srcDirs = ["lib/src"]
 
 repositories{
     mavenCentral()
@@ -62,20 +62,53 @@ task jarAndroid{
     dependsOn "jar"
 
     doLast{
-        if(!sdkRoot || !new File(sdkRoot).exists()) throw new GradleException("No valid Android SDK found. Ensure that ANDROID_HOME is set to your Android SDK directory.");
+        if(!sdkRoot || !new File(sdkRoot).exists()) {
+            logger.warn("Android SDK not found, skipping Android build")
+            return
+        }
 
         def platformRoot = new File("$sdkRoot/platforms/").listFiles().sort().reverse().find{ f -> new File(f, "android.jar").exists()}
 
-        if(!platformRoot) throw new GradleException("No android.jar found. Ensure that you have an Android platform installed.")
+        if(!platformRoot) {
+            logger.warn("No android.jar found, skipping Android build")
+            return
+        }
+
+        // Находим d8
+        def buildToolsDir = new File("$sdkRoot/build-tools")
+        def buildTools = buildToolsDir.listFiles()?.find{ it.isDirectory() }
+        
+        if(!buildTools) {
+            logger.warn("No build-tools found, skipping Android build")
+            return
+        }
+        
+        def d8 = new File(buildTools, isWindows ? "d8.bat" : "d8")
+        if(!d8.exists()) {
+            logger.warn("d8 not found at ${d8.path}, skipping Android build")
+            return
+        }
 
         //collect dependencies needed for desugaring
         def dependencies = (configurations.compileClasspath.asList() + configurations.runtimeClasspath.asList() + [new File(platformRoot, "android.jar")]).collect{ "--classpath $it.path" }.join(" ")
 
-        def d8 = isWindows ? "d8.bat" : "d8"
-
         //dex and desugar files - this requires d8 in your PATH
-        "$d8 $dependencies --min-api 14 --output ${project.name}Android.jar ${project.name}Desktop.jar"
-            .execute(null, new File("$buildDir/libs")).waitForProcessOutput(System.out, System.err)
+        def desktopJar = new File("$buildDir/libs/${project.name}Desktop.jar")
+        def androidJar = new File("$buildDir/libs/${project.name}Android.jar")
+        
+        def command = "$d8.path $dependencies --min-api 14 --output $androidJar.path $desktopJar.path"
+        logger.lifecycle("Running: $command")
+        
+        def process = command.execute(null, new File("$buildDir/libs"))
+        process.waitForProcessOutput(System.out, System.err)
+        
+        if(process.exitValue() != 0) {
+            throw new GradleException("d8 failed with exit code ${process.exitValue()}")
+        }
+        
+        if(!androidJar.exists()) {
+            throw new GradleException("Android JAR was not created at ${androidJar.path}")
+        }
     }
 }
 
@@ -90,8 +123,12 @@ jar{
         include "mod.hjson"
     }
 
-    from("assets/"){
+    from("lib/assets/"){
         include "**"
+    }
+    
+    from(projectDir){
+        include "icon.png"
     }
 }
 
