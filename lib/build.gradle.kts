@@ -1,6 +1,16 @@
+buildscript {
+    repositories {
+        maven { url = uri("https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository") }
+    }
+    dependencies {
+        classpath("com.github.Anuken:mgpp:1.0.0")
+    }
+}
+
 plugins {
     `java-library`
     `maven-publish`
+    id("com.github.Anuken.mgpp")
 }
 
 sourceSets {
@@ -28,6 +38,12 @@ tasks.jar {
     from("mod.hjson")
     from("icon.png")
     from("assets")
+}
+
+// Плагин mgpp автоматически создает задачу dexJar и deploy для Android
+// Настройка modCore
+extensions.configure<com.github.anuken.mgpp.MindustryExtension> {
+    version.set("v147")
 }
 
 publishing {
