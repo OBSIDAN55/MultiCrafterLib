@@ -25,13 +25,12 @@ jobs:
       - name: Build library
         run: |
           chmod +x gradlew
-          ./gradlew :lib:build
+          ./gradlew :lib:deploy
 
       - name: Move building
         run: |
           mkdir out
-          cp lib/build/libs/lib-*.jar out/
-          rm -f out/*-sources.jar out/*-javadoc.jar
+          cp lib/build/tmp/deploy/MultiCrafterLib.zip out/
 
       - name: Upload building
         uses: actions/upload-artifact@v4

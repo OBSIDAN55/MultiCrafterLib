@@ -30,12 +30,12 @@ jobs:
 
       - name: Build library
         run: |
-          ./gradlew :lib:build
+          ./gradlew :lib:deploy
 
       - name: Upload library artifacts
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: MultiCrafterLib
-          path: lib/build/libs/*.jar
+          path: lib/build/tmp/deploy/MultiCrafterLib.zip
           if-no-files-found: warn

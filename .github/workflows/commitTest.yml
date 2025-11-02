@@ -28,14 +28,14 @@ jobs:
       - name: Build mod jar
         run: |
           chmod +x ./gradlew
-          ./gradlew :lib:jar
+          ./gradlew :lib:deploy
 
       - name: Upload built jar file
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ${{ github.event.repository.name }}
-          path: lib/build/libs/MultiCrafterLib.jar
+          path: lib/build/tmp/deploy/MultiCrafterLib.zip
           if-no-files-found: warn
 
       - name: Create release
@@ -43,4 +43,4 @@ jobs:
         with:
           tag: ${{ github.run_number }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: lib/build/libs/MultiCrafterLib.jar
+          file: lib/build/tmp/deploy/MultiCrafterLib.zip
