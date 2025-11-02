@@ -2,51 +2,31 @@ name: Build Mod
 
 on: [push, pull_request]
 
-permissions:
-  contents: write  # <--- нужно обязательно!
-
-
 jobs:
   buildJar:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
-
+      - uses: actions/checkout@v2
+      - name: Set up PATH
+        run: |
+          echo "${ANDROID_HOME}/build-tools/34.0.0" >> $GITHUB_PATH
       - name: Set up JDK 17
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v1
         with:
-          java-version: '17'
-          distribution: 'temurin'
-          cache: 'gradle'
-
-      - name: Build library
+          java-version: 17
+      - name: Build mod jar
         run: |
           chmod +x ./gradlew
-          ./gradlew :lib:build
-
+          ./gradlew deploy
       - name: Upload built jar file
         uses: actions/upload-artifact@v4
-        if: always()
         with:
           name: ${{ github.event.repository.name }}
-          path: lib/build/libs/lib-*.jar
-          if-no-files-found: warn
-
-      - name: Find jar file
-        id: find_jar
-        run: |
-          JAR_FILE=$(find lib/build/libs -name "lib-*.jar" -not -name "*-sources.jar" -not -name "*-javadoc.jar" -type f | head -n 1)
-          if [ -z "$JAR_FILE" ]; then
-            echo "Error: No jar file found in lib/build/libs/"
-            exit 1
-          fi
-          echo "jar_path=$JAR_FILE" >> $GITHUB_OUTPUT
-          echo "Found jar file: $JAR_FILE"
-
+          path: build/libs/${{ github.event.repository.name }}.jar
       - name: Create release
         uses: svenstaro/upload-release-action@v2
         with:
           tag: ${{ github.run_number }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ steps.find_jar.outputs.jar_path }}
+          file: build/libs/${{ github.event.repository.name }}.jar
