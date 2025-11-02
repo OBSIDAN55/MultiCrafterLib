@@ -24,6 +24,7 @@ dependencies {
 }
 
 tasks.jar {
+    archiveFileName.set("MultiCrafterLib.jar")
     from("mod.hjson")
     from("icon.png")
     from("assets")
