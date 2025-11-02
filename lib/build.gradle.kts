@@ -51,9 +51,15 @@ val dexJar = tasks.register("dexJar") {
         val buildTools = if (buildToolsDir.exists() && buildToolsDir.isDirectory) {
             buildToolsDir.listFiles()?.filter { 
                 it.isDirectory && it.name.matches(Regex("\\d+\\.\\d+\\.\\d+"))
-            }?.maxByOrNull { file ->
-                file.name.split('.').map { it.toIntOrNull() ?: 0 }
-            }
+            }?.maxWithOrNull(compareBy { dir ->
+                dir.name.split('.').mapNotNull { it.toIntOrNull() }.let {
+                    // Сравниваем версии: major * 1000000 + minor * 1000 + patch
+                    if (it.size >= 3) it[0] * 1000000 + it[1] * 1000 + it[2]
+                    else if (it.size == 2) it[0] * 1000000 + it[1] * 1000
+                    else if (it.size == 1) it[0] * 1000000
+                    else 0
+                }
+            })
         } else {
             null
         }
