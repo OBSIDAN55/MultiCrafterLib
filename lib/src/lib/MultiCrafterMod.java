@@ -1,7 +1,12 @@
 package lib;
 
 import mindustry.mod.Mod;
+import lib.tests.*;
 
 public class MultiCrafterMod extends Mod {
-    // Minimal mod adapter - library only, no content initialization needed
+
+    public void loadContent(){
+        TestBlocks.load();
+    }
+
 }
