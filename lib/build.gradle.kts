@@ -1,16 +1,7 @@
-buildscript {
-    repositories {
-        maven { url = uri("https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository") }
-    }
-    dependencies {
-        classpath("com.github.Anuken:mgpp:1.0.0")
-    }
-}
-
 plugins {
     `java-library`
     `maven-publish`
-    id("com.github.Anuken.mgpp")
+    id("com.github.Anuken.mgpp") version "1.0.0"
 }
 
 sourceSets {
