@@ -5,8 +5,12 @@ import lib.tests.*;
 
 public class MultiCrafterMod extends Mod {
 
+    boolean debug = true;
+
     public void loadContent(){
-        TestBlocks.load();
+        if (debug) {
+            TestBlocks.load();
+        }
     }
 
 }
