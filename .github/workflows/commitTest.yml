@@ -32,23 +32,23 @@ jobs:
         if: always()
         with:
           name: ${{ github.event.repository.name }}
-          path: lib/build/tmp/deploy/MultiCrafterLib.zip
+          path: lib/build/tmp/deploy/MultiCrafterLib.jar
           if-no-files-found: warn
 
-      - name: Find zip file
-        id: find_zip
+      - name: Find jar file
+        id: find_jar
         run: |
-          ZIP_FILE=$(find lib/build/tmp/deploy -name "*.zip" -type f | head -n 1)
-          if [ -z "$ZIP_FILE" ]; then
-            echo "Error: No zip file found in lib/build/tmp/deploy/"
+          JAR_FILE=$(find lib/build/tmp/deploy -name "*.jar" -type f | head -n 1)
+          if [ -z "$JAR_FILE" ]; then
+            echo "Error: No jar file found in lib/build/tmp/deploy/"
             exit 1
           fi
-          echo "zip_path=$ZIP_FILE" >> $GITHUB_OUTPUT
-          echo "Found zip file: $ZIP_FILE"
+          echo "jar_path=$JAR_FILE" >> $GITHUB_OUTPUT
+          echo "Found jar file: $JAR_FILE"
 
       - name: Create release
         uses: svenstaro/upload-release-action@v2
         with:
           tag: ${{ github.run_number }}
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: ${{ steps.find_zip.outputs.zip_path }}
+          file: ${{ steps.find_jar.outputs.jar_path }}

@@ -30,26 +30,17 @@ tasks.jar {
     from("assets")
 }
 
-// Задача deploy для создания финального ZIP файла
-tasks.register("deploy", Zip::class.java) {
+// Задача deploy для создания готового JAR файла
+tasks.register("deploy", Copy::class.java) {
     group = "build"
-    description = "Create deployable mod ZIP"
+    description = "Copy deployable JAR to output directory"
     
     dependsOn(tasks.jar)
     
-    archiveFileName.set("MultiCrafterLib.zip")
-    destinationDirectory.set(layout.buildDirectory.dir("tmp/deploy"))
-    
-    from("mod.hjson")
-    from("icon.png")
-    from("assets")
-    
-    // Используем обычный JAR - Mindustry сам обработает его для Android
     from(tasks.jar.get().archiveFile) {
         rename { "MultiCrafterLib.jar" }
     }
-    
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    into(layout.buildDirectory.dir("tmp/deploy"))
 }
 
 publishing {
