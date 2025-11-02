@@ -25,22 +25,22 @@ jobs:
       - name: Build mod jar
         run: |
           chmod +x ./gradlew
-          ./gradlew :lib:deploy
+          ./gradlew deploy
 
       - name: Upload built jar file
         uses: actions/upload-artifact@v4
         if: always()
         with:
           name: ${{ github.event.repository.name }}
-          path: lib/build/tmp/deploy/MultiCrafterLib.jar
+          path: build/libs/MultiCrafter*.jar
           if-no-files-found: warn
 
       - name: Find jar file
         id: find_jar
         run: |
-          JAR_FILE=$(find lib/build/tmp/deploy -name "*.jar" -type f | head -n 1)
+          JAR_FILE=$(find build/libs -name "MultiCrafter*.jar" -not -name "*Desktop*" -not -name "*Android*" -type f | head -n 1)
           if [ -z "$JAR_FILE" ]; then
-            echo "Error: No jar file found in lib/build/tmp/deploy/"
+            echo "Error: No jar file found in build/libs/"
             exit 1
           fi
           echo "jar_path=$JAR_FILE" >> $GITHUB_OUTPUT
