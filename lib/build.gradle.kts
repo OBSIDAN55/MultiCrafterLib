@@ -1,8 +1,20 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url = uri("https://raw.githubusercontent.com/Zelaux/MindustryRepo/master/repository") }
+        maven { url = uri("https://www.jitpack.io") }
+    }
+    dependencies {
+        classpath("com.github.Anuken:mgpp:1.0.0")
+    }
+}
+
 plugins {
     `java-library`
     `maven-publish`
-    id("com.github.Anuken.mgpp") version "1.0.0"
 }
+
+apply(plugin = "com.github.Anuken.mgpp")
 
 sourceSets {
     main {
