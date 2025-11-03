@@ -45,6 +45,8 @@ public class UnitAssemblerWithMenu extends PayloadBlock{
     public int[] capacities = {};
 
     public Seq<CustomAssemblerUnitPlan> plans = new Seq<>(50);
+    // JSON/HJSON-конфиг планов (может быть Seq/ObjectMap/JsonValue)
+    public Object plansJson;
 
     protected @Nullable ConsumePayloadDynamic consPayload;
     protected @Nullable ConsumeItemDynamic consItem;
@@ -153,6 +155,15 @@ public class UnitAssemblerWithMenu extends PayloadBlock{
 
     @Override
     public void init(){
+        // Если планы заданы в JSON, распарсить их до инициализации консьюмеров
+        if((plans == null || plans.isEmpty()) && plansJson != null){
+            UnitAssemblerJsonParser parser = new UnitAssemblerJsonParser();
+            Seq<CustomAssemblerUnitPlan> parsed = parser.parse(plansJson);
+            if(parsed != null && !parsed.isEmpty()){
+                plans = parsed;
+            }
+            plansJson = null;
+        }
         updateClipRadius((areaSize + 1) * tilesize);
 
         consume(consPayload = new ConsumePayloadDynamic((UnitAssemblerWithMenuBuild build) -> build.plan().requirements));
