@@ -370,7 +370,7 @@ public class UnitAssemblerWithMenu extends PayloadBlock{
                 button.clicked(() -> {
                     selectedMode = planIndex;
                     currentTier = planIndex;
-                });
+            });
 
                 final int finalPlanIndex = planIndex;
                 button.update(() -> button.setChecked(selectedMode == finalPlanIndex));
@@ -787,6 +787,9 @@ public class UnitAssemblerWithMenu extends PayloadBlock{
         public void write(Writes write){
             super.write(write);
 
+            // persist UI selection state
+            write.i(selectedMode);
+            write.i(currentTier);
             write.f(progress);
             write.b(units.size);
             for(Unit unit : units){
@@ -800,6 +803,8 @@ public class UnitAssemblerWithMenu extends PayloadBlock{
         @Override
         public void read(Reads read, byte revision){
             super.read(read, revision);
+            selectedMode = read.i();
+            currentTier = read.i();
             progress = read.f();
             int count = read.b();
             readUnits.clear();
@@ -812,6 +817,13 @@ public class UnitAssemblerWithMenu extends PayloadBlock{
             if(revision >= 1){
                 commandPos = TypeIO.readVecNullable(read);
             }
+
+            // clamp and synchronize selection with available plans
+            int maxIndex = Math.max(0, plans.size - 1);
+            selectedMode = Mathf.clamp(selectedMode, 0, maxIndex);
+            currentTier = Mathf.clamp(currentTier, 0, maxIndex);
+            // keep both aligned with UI behavior (button click sets both)
+            currentTier = selectedMode;
         }
     }
 }

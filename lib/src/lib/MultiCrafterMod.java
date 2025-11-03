@@ -11,6 +11,7 @@ public class MultiCrafterMod extends Mod {
         if (debug) {
             TestBlocks.load();
         }
+        Vars.load();
     }
 
 }
